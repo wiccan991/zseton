@@ -55,6 +55,7 @@
   .stat .l{ font-size:10px; text-transform:uppercase; letter-spacing:1px; color:rgba(243,234,217,0.55); margin-top:2px;}
   #score .n{ color:var(--good); }
   #streak .n{ color:var(--gold); }
+  #best .n{ color:#e0a03f; }
 
   .table{
     width:100%; max-width:420px;
@@ -143,10 +144,7 @@
   .diff-btn .diff-desc{ font-size:11.5px; font-weight:400; opacity:0.75; }
 
   .menu-btn{
-    position:fixed;
-    top:calc(env(safe-area-inset-top) + 12px);
-    left:14px;
-    z-index:5;
+    align-self:flex-start;
     font-size:13px; font-weight:600;
     padding:8px 14px;
     border-radius:10px;
@@ -154,6 +152,7 @@
     background:rgba(0,0,0,0.25);
     color:var(--cream);
     box-shadow:none;
+    margin-bottom:12px;
   }
   .menu-btn:active{ transform:translateY(1px); }
 </style>
@@ -188,6 +187,7 @@
     <div class="stat" id="total"><div class="n">0</div><div class="l">Kör</div></div>
     <div class="stat" id="score"><div class="n">0</div><div class="l">Helyes</div></div>
     <div class="stat" id="streak"><div class="n">0</div><div class="l">Sorozat</div></div>
+    <div class="stat" id="best"><div class="n">0</div><div class="l">Rekord</div></div>
   </div>
 
   <div class="table" id="table"></div>
@@ -208,7 +208,27 @@ const CIMLETEK = {
   5000: { label:'5000', body:'#c73c37', light:'#e0645f', dark:'#9c2b27', darker:'#78211e', rim:'#fdecec' }
 };
 const kulcsok = Object.keys(CIMLETEK).map(Number);
-let jatek = 0, score = 0, total = 0, streak = 0;
+let jatek = 0, score = 0, total = 0, streak = 0, bestStreak = 0;
+
+function loadBestStreak(){
+  try{
+    const v = localStorage.getItem('zseton-best-streak');
+    if(v){
+      bestStreak = parseInt(v, 10) || 0;
+      document.querySelector('#best .n').textContent = bestStreak;
+    }
+  }catch(e){
+    // localStorage unavailable (e.g. private browsing) — stay at 0
+  }
+}
+function saveBestStreak(v){
+  try{
+    localStorage.setItem('zseton-best-streak', String(v));
+  }catch(e){
+    // saving failed silently — not critical to gameplay
+  }
+}
+loadBestStreak();
 
 const DIFFICULTIES = {
   konnyu: { maxDb:10, fajtak:2 },
@@ -444,6 +464,11 @@ function ellenoriz(){
     score++; streak++;
     msg.textContent = 'Ügyes vagy! Jön a következő asztal.';
     msg.className = 'good';
+    if(streak > bestStreak){
+      bestStreak = streak;
+      document.querySelector('#best .n').textContent = bestStreak;
+      saveBestStreak(bestStreak);
+    }
   } else {
     streak = 0;
     msg.textContent = 'Nem jó — a helyes válasz: ' + jatek.toLocaleString('hu-HU') + ' Ft';
