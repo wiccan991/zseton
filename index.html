@@ -76,6 +76,8 @@
 
   .group{
     display:flex; align-items:flex-end; gap:10px;
+    flex-wrap:wrap; justify-content:center; row-gap:14px;
+    max-width:100%;
     background:rgba(0,0,0,0.12);
     border-radius:14px;
     padding:8px 10px 4px;
@@ -173,12 +175,18 @@ const rnd = a => a[Math.floor(Math.random() * a.length)];
 const ri = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 let uidCounter = 0;
+const RX = 44, RY = 22, CHIP_H = 15, PAD = 6;
+const STACK_W = RX*2 + PAD*2;
+function stackH(count){
+  const bottomY = (RY+PAD) + count*CHIP_H;
+  const groundY = bottomY + RY*0.55;
+  return groundY + RY*0.7 + PAD;
+}
 
 // Builds one whole chip stack (side wall + top face + grounded shadow) as a single isometric SVG.
 function isoStackSVG(cimlet, count){
   const k = CIMLETEK[cimlet];
   const uid = 'g' + (uidCounter++);
-  const RX = 44, RY = 22, CHIP_H = 15, PAD = 6;
   const cx = RX + PAD;
   const topY = RY + PAD;
   const bottomY = topY + count * CHIP_H;
@@ -191,6 +199,7 @@ function isoStackSVG(cimlet, count){
     ' L ' + (cx+RX) + ' ' + topY + ' Z';
   const wall = '<path d="' + wallPathD + '" fill="url(#body-' + uid + ')"/>';
 
+  // alternating light/dark banding per chip layer, clipped to the true wall shape
   let bands = '';
   for(let i=0;i<count;i++){
     const y0 = topY + i*CHIP_H;
@@ -198,6 +207,7 @@ function isoStackSVG(cimlet, count){
       '" fill="' + (i % 2 === 0 ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.14)') + '"/>';
   }
 
+  // horizontal seams between individual chips: dark groove + light rim right below it
   let seams = '';
   for(let i=1;i<count;i++){
     const y = topY + i * CHIP_H;
@@ -207,6 +217,7 @@ function isoStackSVG(cimlet, count){
       '" fill="none" stroke="' + k.light + '" stroke-width="1.3" opacity="0.5"/>';
   }
 
+  // vertical white edge-spot stripes running down the roll
   let stripes = '';
   [-0.64, -0.24, 0.24, 0.64].forEach(f => {
     const x = cx + f * RX;
@@ -214,6 +225,7 @@ function isoStackSVG(cimlet, count){
       '" rx="3" fill="' + k.rim + '" opacity="0.92"/>';
   });
 
+  // top face (ellipse chip design)
   function pt(fracX, fracY, angleDeg){
     const a = angleDeg * Math.PI/180;
     return [cx + fracX*RX*Math.sin(a), topY - fracY*RY*Math.cos(a)];
@@ -259,10 +271,78 @@ function isoStackSVG(cimlet, count){
     '</svg>';
 }
 
+// A near-frontal single coin (for loose piles of 1-4), showing the full round face with a thin edge.
+function coinSVG(cimlet){
+  const k = CIMLETEK[cimlet];
+  const uid = 'g' + (uidCounter++);
+  const R = 46, RYc = 42, THICK = 9, PAD2 = 6;
+  const cx = R + PAD2, cy = RYc + PAD2;
+  const W = R*2 + PAD2*2, H = RYc*2 + THICK + PAD2*2;
+
+  const edge = '<ellipse cx="' + cx + '" cy="' + (cy+THICK) + '" rx="' + R + '" ry="' + RYc + '" fill="' + k.darker + '"/>';
+
+  function pt(fracX, fracY, angleDeg){
+    const a = angleDeg * Math.PI/180;
+    return [cx + fracX*R*Math.sin(a), cy - fracY*RYc*Math.cos(a)];
+  }
+  let notches = '';
+  for(let i=0;i<8;i++){
+    const [nx, ny] = pt(0.86, 0.86, i*45);
+    notches += '<rect x="' + (nx-5) + '" y="' + (ny-4) + '" width="10" height="8" rx="3" fill="' + k.rim + '"/>';
+  }
+  let stars = '';
+  for(let i=0;i<10;i++){
+    const [sx, sy] = pt(0.44, 0.44, i*36);
+    stars += '<text x="' + sx.toFixed(1) + '" y="' + sy.toFixed(1) + '" font-size="6" text-anchor="middle" dominant-baseline="middle" fill="' + k.rim + '" opacity="0.9">&#9733;</text>';
+  }
+  const fontSize = cimlet >= 1000 ? 15.5 : 18;
+
+  const face =
+    '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + R + '" ry="' + RYc + '" fill="url(#coinface-' + uid + ')"/>' +
+    notches +
+    '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + (R*0.72) + '" ry="' + (RYc*0.72) + '" fill="' + k.body + '"/>' +
+    '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + (R*0.56) + '" ry="' + (RYc*0.56) + '" fill="none" stroke="' + k.rim + '" stroke-width="2" stroke-dasharray="2.6 2.6"/>' +
+    stars +
+    '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + (R*0.4) + '" ry="' + (RYc*0.4) + '" fill="' + k.darker + '" stroke="' + k.rim + '" stroke-width="1.8"/>' +
+    '<text x="' + cx + '" y="' + (cy+1) + '" font-size="' + fontSize + '" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="' + k.rim + '" stroke="rgba(0,0,0,0.5)" stroke-width="0.9" paint-order="stroke" font-family="Georgia, serif">' + k.label + '</text>';
+
+  return '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" role="img"><title>' + cimlet + ' Ft-os zseton</title>' +
+    '<defs><radialGradient id="coinface-' + uid + '" cx="0.4" cy="0.35" r="0.75">' +
+      '<stop offset="0" stop-color="' + k.light + '"/>' +
+      '<stop offset="1" stop-color="' + k.body + '"/>' +
+    '</radialGradient></defs>' +
+    edge + face + '</svg>';
+}
+
+function loosePileEl(cimlet, count){
+  const coinSize = 116, overlap = 40;
+  const totalW = coinSize + (count-1) * (coinSize - overlap);
+  const wrap = document.createElement('div');
+  wrap.style.position = 'relative';
+  wrap.style.width = totalW + 'px';
+  wrap.style.height = coinSize + 'px';
+  for(let i=0;i<count;i++){
+    const s = document.createElement('div');
+    s.style.position = 'absolute';
+    s.style.left = (i * (coinSize - overlap)) + 'px';
+    s.style.bottom = '0';
+    s.style.zIndex = i+1;
+    const rot = (Math.random()*8 - 4).toFixed(1);
+    s.style.transform = 'rotate(' + rot + 'deg)';
+    s.innerHTML = coinSVG(cimlet);
+    wrap.appendChild(s);
+  }
+  return wrap;
+}
+
 function stackEl(cimlet, count){
   const pile = document.createElement('div');
   pile.className = 'pile';
-  pile.innerHTML = isoStackSVG(cimlet, count);
+  if(count < 5){
+    pile.appendChild(loosePileEl(cimlet, count));
+  } else {
+    pile.innerHTML = isoStackSVG(cimlet, count);
+  }
   return pile;
 }
 
