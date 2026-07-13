@@ -275,7 +275,7 @@ function isoStackSVG(cimlet, count){
 function coinSVG(cimlet){
   const k = CIMLETEK[cimlet];
   const uid = 'g' + (uidCounter++);
-  const R = 46, RYc = 42, THICK = 9, PAD2 = 6;
+  const R = 37, RYc = 33, THICK = 7, PAD2 = 5;
   const cx = R + PAD2, cy = RYc + PAD2;
   const W = R*2 + PAD2*2, H = RYc*2 + THICK + PAD2*2;
 
@@ -288,23 +288,23 @@ function coinSVG(cimlet){
   let notches = '';
   for(let i=0;i<8;i++){
     const [nx, ny] = pt(0.86, 0.86, i*45);
-    notches += '<rect x="' + (nx-5) + '" y="' + (ny-4) + '" width="10" height="8" rx="3" fill="' + k.rim + '"/>';
+    notches += '<rect x="' + (nx-4) + '" y="' + (ny-3.2) + '" width="8" height="6.4" rx="2.4" fill="' + k.rim + '"/>';
   }
   let stars = '';
   for(let i=0;i<10;i++){
     const [sx, sy] = pt(0.44, 0.44, i*36);
-    stars += '<text x="' + sx.toFixed(1) + '" y="' + sy.toFixed(1) + '" font-size="6" text-anchor="middle" dominant-baseline="middle" fill="' + k.rim + '" opacity="0.9">&#9733;</text>';
+    stars += '<text x="' + sx.toFixed(1) + '" y="' + sy.toFixed(1) + '" font-size="4.8" text-anchor="middle" dominant-baseline="middle" fill="' + k.rim + '" opacity="0.9">&#9733;</text>';
   }
-  const fontSize = cimlet >= 1000 ? 15.5 : 18;
+  const fontSize = cimlet >= 1000 ? 12.5 : 14.5;
 
   const face =
     '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + R + '" ry="' + RYc + '" fill="url(#coinface-' + uid + ')"/>' +
     notches +
     '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + (R*0.72) + '" ry="' + (RYc*0.72) + '" fill="' + k.body + '"/>' +
-    '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + (R*0.56) + '" ry="' + (RYc*0.56) + '" fill="none" stroke="' + k.rim + '" stroke-width="2" stroke-dasharray="2.6 2.6"/>' +
+    '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + (R*0.56) + '" ry="' + (RYc*0.56) + '" fill="none" stroke="' + k.rim + '" stroke-width="1.6" stroke-dasharray="2.2 2.2"/>' +
     stars +
-    '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + (R*0.4) + '" ry="' + (RYc*0.4) + '" fill="' + k.darker + '" stroke="' + k.rim + '" stroke-width="1.8"/>' +
-    '<text x="' + cx + '" y="' + (cy+1) + '" font-size="' + fontSize + '" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="' + k.rim + '" stroke="rgba(0,0,0,0.5)" stroke-width="0.9" paint-order="stroke" font-family="Georgia, serif">' + k.label + '</text>';
+    '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + (R*0.4) + '" ry="' + (RYc*0.4) + '" fill="' + k.darker + '" stroke="' + k.rim + '" stroke-width="1.4"/>' +
+    '<text x="' + cx + '" y="' + (cy+1) + '" font-size="' + fontSize + '" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="' + k.rim + '" stroke="rgba(0,0,0,0.5)" stroke-width="0.7" paint-order="stroke" font-family="Georgia, serif">' + k.label + '</text>';
 
   return '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" role="img"><title>' + cimlet + ' Ft-os zseton</title>' +
     '<defs><radialGradient id="coinface-' + uid + '" cx="0.4" cy="0.35" r="0.75">' +
@@ -315,12 +315,13 @@ function coinSVG(cimlet){
 }
 
 function loosePileEl(cimlet, count){
-  const coinSize = 116, overlap = 40;
+  const coinSize = 84, overlap = 38;
   const totalW = coinSize + (count-1) * (coinSize - overlap);
   const wrap = document.createElement('div');
   wrap.style.position = 'relative';
   wrap.style.width = totalW + 'px';
   wrap.style.height = coinSize + 'px';
+  wrap.style.maxWidth = '100%';
   for(let i=0;i<count;i++){
     const s = document.createElement('div');
     s.style.position = 'absolute';
