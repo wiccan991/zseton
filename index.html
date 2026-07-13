@@ -141,6 +141,21 @@
   }
   .diff-btn .diff-name{ font-family:Georgia,serif; font-weight:700; }
   .diff-btn .diff-desc{ font-size:11.5px; font-weight:400; opacity:0.75; }
+
+  .menu-btn{
+    position:fixed;
+    top:calc(env(safe-area-inset-top) + 12px);
+    left:14px;
+    z-index:5;
+    font-size:13px; font-weight:600;
+    padding:8px 14px;
+    border-radius:10px;
+    border:1px solid rgba(212,175,55,0.4);
+    background:rgba(0,0,0,0.25);
+    color:var(--cream);
+    box-shadow:none;
+  }
+  .menu-btn:active{ transform:translateY(1px); }
 </style>
 </head>
 <body>
@@ -163,6 +178,8 @@
       </button>
     </div>
   </div>
+
+  <button id="menu-btn" class="menu-btn">← Főmenü</button>
 
   <h1>♦ Zsetonszámoló ♦</h1>
   <p class="sub">Számold össze az asztalon lévő zsetonokat</p>
@@ -446,6 +463,9 @@ document.querySelectorAll('.diff-btn').forEach(btn => {
     document.getElementById('welcome').classList.add('hidden');
     ujFeladat();
   });
+});
+document.getElementById('menu-btn').addEventListener('click', () => {
+  document.getElementById('welcome').classList.remove('hidden');
 });
 </script>
 </body>
