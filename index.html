@@ -191,7 +191,6 @@ function isoStackSVG(cimlet, count){
     ' L ' + (cx+RX) + ' ' + topY + ' Z';
   const wall = '<path d="' + wallPathD + '" fill="url(#body-' + uid + ')"/>';
 
-  // alternating light/dark banding per chip layer, clipped to the true wall shape
   let bands = '';
   for(let i=0;i<count;i++){
     const y0 = topY + i*CHIP_H;
@@ -199,7 +198,6 @@ function isoStackSVG(cimlet, count){
       '" fill="' + (i % 2 === 0 ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.14)') + '"/>';
   }
 
-  // horizontal seams between individual chips: dark groove + light rim right below it
   let seams = '';
   for(let i=1;i<count;i++){
     const y = topY + i * CHIP_H;
@@ -209,7 +207,6 @@ function isoStackSVG(cimlet, count){
       '" fill="none" stroke="' + k.light + '" stroke-width="1.3" opacity="0.5"/>';
   }
 
-  // vertical white edge-spot stripes running down the roll
   let stripes = '';
   [-0.64, -0.24, 0.24, 0.64].forEach(f => {
     const x = cx + f * RX;
@@ -217,7 +214,6 @@ function isoStackSVG(cimlet, count){
       '" rx="3" fill="' + k.rim + '" opacity="0.92"/>';
   });
 
-  // top face (ellipse chip design)
   function pt(fracX, fracY, angleDeg){
     const a = angleDeg * Math.PI/180;
     return [cx + fracX*RX*Math.sin(a), topY - fracY*RY*Math.cos(a)];
