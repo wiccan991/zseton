@@ -44,13 +44,12 @@
 
   .scoreboard{
     display:flex; width:100%; max-width:420px;
-    background:linear-gradient(180deg,#16493a,#0d3327);
+    background:var(--plaque);
     border:1px solid rgba(212,175,55,0.35);
     border-radius:14px;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,0.06), 0 6px 16px rgba(0,0,0,0.35);
-    margin-bottom:18px; overflow:hidden;
+    margin-bottom:18px;
   }
-  .stat{ flex:1; text-align:center; padding:10px 4px; }
+  .stat{ flex:1; text-align:center; padding:10px 4px; border-radius:14px; }
   .stat + .stat{ border-left:1px solid rgba(212,175,55,0.2); }
   .stat .n{ font-family:Georgia,serif; font-size:24px; font-weight:700; }
   .stat .l{ font-size:10px; text-transform:uppercase; letter-spacing:1px; color:rgba(243,234,217,0.55); margin-top:2px;}
