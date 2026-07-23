@@ -229,6 +229,7 @@ const ri = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const round100 = n => Math.round(n / 100) * 100;
 
 let target = 0;
+let lastTarget = null;
 let mathIndex = 0;
 let mathCorrect = 0;
 let currentStreak = 0;
@@ -269,7 +270,12 @@ function updateCorrectStat(){
 }
 
 function genTarget(){
-  return ri(TARGET_MIN_STEPS, TARGET_MAX_STEPS) * 100;
+  let n;
+  do{
+    n = ri(TARGET_MIN_STEPS, TARGET_MAX_STEPS) * 100;
+  } while(n === lastTarget);
+  lastTarget = n;
+  return n;
 }
 
 function genMathTask(){
