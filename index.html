@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Zsetonszámoló">
+<meta name="apple-mobile-web-app-title" content="Zseton Játékok">
 <meta name="theme-color" content="#0b3d2e">
-<title>Zsetonszámoló</title>
+<title>Zseton Játékok</title>
 <style>
   :root{
     --felt-1:#0e5c44;
@@ -16,9 +16,6 @@
     --gold-dim:#a5842a;
     --plaque:#123a2c;
     --cream:#f3ead9;
-    --ink:#0a2118;
-    --good:#5fd38d;
-    --bad:#ff6b6b;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{
@@ -31,496 +28,68 @@
   }
   body{
     display:flex; flex-direction:column; align-items:center;
-    min-height:100vh; padding:calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 24px);
+    min-height:100vh; padding:calc(env(safe-area-inset-top) + 40px) 16px calc(env(safe-area-inset-bottom) + 24px);
   }
   h1{
     font-family:Georgia,"Times New Roman",serif;
     font-weight:700; letter-spacing:1px;
-    font-size:22px; color:var(--gold);
+    font-size:26px; color:var(--gold);
     text-shadow:0 1px 0 rgba(0,0,0,0.4);
-    margin:0 0 4px;
+    margin:0 0 6px;
+    text-align:center;
   }
-  .sub{ font-size:12px; color:rgba(243,234,217,0.55); margin-bottom:16px; letter-spacing:0.5px;}
-
-  .scoreboard{
-    display:flex; width:100%; max-width:420px;
-    background:var(--plaque);
-    border:1px solid rgba(212,175,55,0.35);
-    border-radius:14px;
-    margin-bottom:18px;
+  .sub{
+    font-size:13px; color:rgba(243,234,217,0.55);
+    margin-bottom:32px; letter-spacing:0.5px; text-align:center;
   }
-  .stat{ flex:1; text-align:center; padding:10px 4px; border-radius:14px; }
-  .stat + .stat{ border-left:1px solid rgba(212,175,55,0.2); }
-  .stat .n{ font-family:Georgia,serif; font-size:24px; font-weight:700; }
-  .stat .l{ font-size:10px; text-transform:uppercase; letter-spacing:1px; color:rgba(243,234,217,0.55); margin-top:2px;}
-  #score .n{ color:var(--good); }
-  #streak .n{ color:var(--gold); }
-  #best .n{ color:#e0a03f; }
 
-  .table{
+  .games{
     width:100%; max-width:420px;
+    display:flex; flex-direction:column; gap:16px;
+  }
+
+  .game-card{
+    display:block; text-decoration:none;
     background:
       radial-gradient(ellipse at center, rgba(255,255,255,0.05), transparent 70%),
       var(--felt-1);
     border-radius:16px;
-    border:6px solid #6b3a20;
-    box-shadow: inset 0 0 30px rgba(0,0,0,0.45), 0 8px 20px rgba(0,0,0,0.4);
-    display:flex; flex-direction:column; align-items:center;
-    gap:20px;
-    padding:22px 12px 20px;
-    margin-bottom:18px;
-  }
-
-  .pile{ display:flex; flex-direction:column; align-items:center; }
-  .pile svg{ display:block; }
-
-  .group{
-    display:flex; align-items:flex-end; gap:10px;
-    flex-wrap:wrap; justify-content:center; row-gap:14px;
-    max-width:100%;
-    background:rgba(0,0,0,0.12);
-    border-radius:14px;
-    padding:8px 10px 4px;
-  }
-
-  .stack-label{
-    margin-top:6px; font-size:11px; color:rgba(243,234,217,0.5);
-  }
-
-  .panel{ width:100%; max-width:420px; }
-  .row{ display:flex; gap:8px; }
-  input[type=number]{
-    flex:1; font-size:18px; padding:14px 14px;
-    border-radius:12px; border:1px solid rgba(212,175,55,0.4);
-    background:rgba(255,255,255,0.06); color:var(--cream);
-    outline:none;
-  }
-  input[type=number]::placeholder{ color:rgba(243,234,217,0.4); }
-  input[type=number]:focus{ border-color:var(--gold); box-shadow:0 0 0 3px rgba(212,175,55,0.2); }
-
-  button{
-    font-size:17px; font-weight:700; letter-spacing:0.3px;
-    padding:14px 20px; border-radius:12px; border:none;
-    background:linear-gradient(180deg,var(--gold),var(--gold-dim));
-    color:#2b2005;
-    box-shadow:0 3px 0 #7a5f18, 0 6px 10px rgba(0,0,0,0.35);
-  }
-  button:active{ transform:translateY(2px); box-shadow:0 1px 0 #7a5f18; }
-
-  #msg{ min-height:22px; font-size:14px; margin:12px 2px 0; text-align:center; }
-  .good{ color:var(--good); }
-  .bad{ color:var(--bad); }
-
-  #welcome{
-    position:fixed; inset:0; z-index:10;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    background:
-      radial-gradient(circle at 50% 30%, var(--felt-1) 0%, var(--felt-2) 75%);
-    padding:24px; text-align:center;
-  }
-  #welcome h2{
-    font-family:Georgia,"Times New Roman",serif;
-    font-size:30px; font-weight:700; color:var(--gold);
-    text-shadow:0 2px 0 rgba(0,0,0,0.4);
-    margin:0 0 10px;
-  }
-  #welcome p{
-    font-size:15px; color:rgba(243,234,217,0.75);
-    max-width:280px; line-height:1.5; margin:0 0 28px;
-  }
-  #welcome button{
-    font-size:18px; padding:16px 32px;
-  }
-  #welcome.hidden{ display:none; }
-
-  .difficulty-row{
-    display:flex; flex-direction:column; gap:10px; width:100%; max-width:300px;
-  }
-  .diff-btn{
-    font-size:16px; padding:14px 18px;
-    display:flex; flex-direction:column; align-items:center; gap:2px;
-  }
-  .diff-btn .diff-name{ font-family:Georgia,serif; font-weight:700; }
-  .diff-btn .diff-desc{ font-size:11.5px; font-weight:400; opacity:0.75; }
-
-  .menu-btn{
-    align-self:flex-start;
-    font-size:13px; font-weight:600;
-    padding:8px 14px;
-    border-radius:10px;
-    border:1px solid rgba(212,175,55,0.4);
-    background:rgba(0,0,0,0.25);
+    border:4px solid #6b3a20;
+    box-shadow: inset 0 0 24px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.4);
+    padding:20px 20px;
     color:var(--cream);
-    box-shadow:none;
-    margin-bottom:12px;
   }
-  .menu-btn:active{ transform:translateY(1px); }
+  .game-card:active{ transform:translateY(2px); }
 
-  .combo-badge{
-    position:fixed; top:38%; left:50%;
-    transform:translate(-50%,-50%) scale(0.7);
-    background:linear-gradient(135deg,var(--gold),var(--gold-dim));
-    color:#2b2005; font-weight:800; font-size:21px;
+  .game-icon{ font-size:30px; margin-bottom:6px; }
+  .game-name{
     font-family:Georgia,"Times New Roman",serif;
-    padding:16px 30px; border-radius:16px;
-    box-shadow:0 12px 32px rgba(0,0,0,0.45);
-    opacity:0; pointer-events:none; z-index:20;
-    text-align:center; white-space:nowrap;
-    transition:opacity 0.22s ease, transform 0.22s ease;
+    font-weight:700; font-size:19px; color:var(--gold);
+    margin-bottom:6px;
   }
-  .combo-badge.show{
-    opacity:1; transform:translate(-50%,-50%) scale(1);
+  .game-desc{
+    font-size:13.5px; line-height:1.5; color:rgba(243,234,217,0.75);
   }
 </style>
 </head>
 <body>
 
-  <div id="welcome">
-    <h2>♦ Szia Kicsim! ♦</h2>
-    <p>Készen állsz, hogy megszámold a zsetonokat? Válassz nehézségi szintet, aztán nézd meg jól a tornyokat, és mondd meg mennyi forintot érnek összesen!</p>
-    <div class="difficulty-row">
-      <button class="diff-btn" data-level="konnyu">
-        <span class="diff-name">Kezdő</span>
-        <span class="diff-desc">max. 10 db / címlet · 2 zsetonfajta</span>
-      </button>
-      <button class="diff-btn" data-level="halado">
-        <span class="diff-name">Haladó</span>
-        <span class="diff-desc">max. 15 db / címlet · 2 zsetonfajta</span>
-      </button>
-      <button class="diff-btn" data-level="nehez">
-        <span class="diff-name">Nehéz</span>
-        <span class="diff-desc">max. 20 db / címlet · 3 zsetonfajta</span>
-      </button>
-    </div>
+  <h1>♦ Zseton Játékok ♦</h1>
+  <p class="sub">Válassz, melyik játékkal szeretnél játszani</p>
+
+  <div class="games">
+    <a class="game-card" href="zsetonszamolo.html">
+      <div class="game-icon">🪙</div>
+      <div class="game-name">Zsetonszámoló</div>
+      <div class="game-desc">Számold össze az asztalon lévő zsetontornyok értékét — 3 nehézségi szinttel.</div>
+    </a>
+
+    <a class="game-card" href="emlekezet_elterelas.html">
+      <div class="game-icon">🧠</div>
+      <div class="game-name">Emlékezet & Elterelés</div>
+      <div class="game-desc">Jegyezz meg egy számot, oldj meg zavaró matekfeladatokat, majd mondd meg, mi volt a szám.</div>
+    </a>
   </div>
 
-  <button id="menu-btn" class="menu-btn">← Főmenü</button>
-
-  <div id="combo-badge" class="combo-badge"></div>
-
-  <h1>♦ Zsetonszámoló ♦</h1>
-  <p class="sub">Számold össze az asztalon lévő zsetonokat</p>
-
-  <div class="scoreboard">
-    <div class="stat" id="total"><div class="n">0</div><div class="l">Kör</div></div>
-    <div class="stat" id="score"><div class="n">0</div><div class="l">Helyes</div></div>
-    <div class="stat" id="streak"><div class="n">0</div><div class="l">Sorozat</div></div>
-    <div class="stat" id="best"><div class="n">0</div><div class="l">Rekord</div></div>
-  </div>
-
-  <div class="table" id="table"></div>
-
-  <div class="panel">
-    <div class="row">
-      <input type="number" id="valasz" inputmode="numeric" placeholder="Összérték (Ft)">
-      <button id="check">Kész</button>
-    </div>
-    <p id="msg"></p>
-  </div>
-
-<script>
-const CIMLETEK = {
-  100:  { label:'100',  body:'#3a8f4f', light:'#5fbf76', dark:'#2c6b3a', darker:'#215430', rim:'#eef7ee' },
-  500:  { label:'500',  body:'#2f6fc4', light:'#5b95e0', dark:'#25579c', darker:'#1c4478', rim:'#eaf2fb' },
-  1000: { label:'1000', body:'#c97a1e', light:'#e8a03f', dark:'#a15e13', darker:'#7d4a0f', rim:'#fdf3e3' },
-  5000: { label:'5000', body:'#c73c37', light:'#e0645f', dark:'#9c2b27', darker:'#78211e', rim:'#fdecec' }
-};
-const kulcsok = Object.keys(CIMLETEK).map(Number);
-let jatek = 0, score = 0, total = 0, streak = 0, bestStreak = 0;
-
-function loadBestStreak(){
-  try{
-    const v = localStorage.getItem('zseton-best-streak');
-    if(v){
-      bestStreak = parseInt(v, 10) || 0;
-      document.querySelector('#best .n').textContent = bestStreak;
-    }
-  }catch(e){
-    // localStorage unavailable (e.g. private browsing) — stay at 0
-  }
-}
-function saveBestStreak(v){
-  try{
-    localStorage.setItem('zseton-best-streak', String(v));
-  }catch(e){
-    // saving failed silently — not critical to gameplay
-  }
-}
-loadBestStreak();
-
-function showCombo(n){
-  const badge = document.getElementById('combo-badge');
-  badge.textContent = '🔥 ' + n + '-ös sorozat!';
-  badge.classList.add('show');
-  clearTimeout(badge._timer);
-  badge._timer = setTimeout(() => badge.classList.remove('show'), 1300);
-}
-
-const DIFFICULTIES = {
-  konnyu: { maxDb:10, fajtak:2 },
-  halado: { maxDb:15, fajtak:2 },
-  nehez:  { maxDb:20, fajtak:3 }
-};
-let currentDifficulty = DIFFICULTIES.konnyu;
-
-const rnd = a => a[Math.floor(Math.random() * a.length)];
-const ri = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-
-let uidCounter = 0;
-const RX = 44, RY = 22, CHIP_H = 15, PAD = 6;
-const STACK_W = RX*2 + PAD*2;
-function stackH(count){
-  const bottomY = (RY+PAD) + count*CHIP_H;
-  const groundY = bottomY + RY*0.55;
-  return groundY + RY*0.7 + PAD;
-}
-
-// Builds one whole chip stack (side wall + top face + grounded shadow) as a single isometric SVG.
-function isoStackSVG(cimlet, count){
-  const k = CIMLETEK[cimlet];
-  const uid = 'g' + (uidCounter++);
-  const cx = RX + PAD;
-  const topY = RY + PAD;
-  const bottomY = topY + count * CHIP_H;
-  const groundY = bottomY + RY * 0.55;
-  const W = RX * 2 + PAD * 2;
-  const H = groundY + RY * 0.7 + PAD;
-
-  const wallPathD = 'M ' + (cx-RX) + ' ' + topY + ' L ' + (cx-RX) + ' ' + bottomY +
-    ' A ' + RX + ' ' + RY + ' 0 0 0 ' + (cx+RX) + ' ' + bottomY +
-    ' L ' + (cx+RX) + ' ' + topY + ' Z';
-  const wall = '<path d="' + wallPathD + '" fill="url(#body-' + uid + ')"/>';
-
-  // alternating light/dark banding per chip layer, clipped to the true wall shape
-  let bands = '';
-  for(let i=0;i<count;i++){
-    const y0 = topY + i*CHIP_H;
-    bands += '<rect x="' + (cx-RX-2) + '" y="' + y0 + '" width="' + (RX*2+4) + '" height="' + CHIP_H +
-      '" fill="' + (i % 2 === 0 ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.14)') + '"/>';
-  }
-
-  // horizontal seams between individual chips: dark groove + light rim right below it
-  let seams = '';
-  for(let i=1;i<count;i++){
-    const y = topY + i * CHIP_H;
-    seams += '<path d="M ' + (cx-RX) + ' ' + y + ' A ' + RX + ' ' + RY + ' 0 0 0 ' + (cx+RX) + ' ' + y +
-      '" fill="none" stroke="' + k.darker + '" stroke-width="2.2" opacity="0.75"/>';
-    seams += '<path d="M ' + (cx-RX) + ' ' + (y+2) + ' A ' + RX + ' ' + (RY) + ' 0 0 0 ' + (cx+RX) + ' ' + (y+2) +
-      '" fill="none" stroke="' + k.light + '" stroke-width="1.3" opacity="0.5"/>';
-  }
-
-  // vertical white edge-spot stripes running down the roll
-  let stripes = '';
-  [-0.64, -0.24, 0.24, 0.64].forEach(f => {
-    const x = cx + f * RX;
-    stripes += '<rect x="' + (x-4) + '" y="' + (topY-2) + '" width="8" height="' + (bottomY-topY+RY+4) +
-      '" rx="3" fill="' + k.rim + '" opacity="0.92"/>';
-  });
-
-  // top face (ellipse chip design)
-  function pt(fracX, fracY, angleDeg){
-    const a = angleDeg * Math.PI/180;
-    return [cx + fracX*RX*Math.sin(a), topY - fracY*RY*Math.cos(a)];
-  }
-  let notches = '';
-  for(let i=0;i<8;i++){
-    const [nx, ny] = pt(0.86, 0.86, i*45);
-    notches += '<rect x="' + (nx-5) + '" y="' + (ny-3.6) + '" width="10" height="7.2" rx="2.6" fill="' + k.rim + '"/>';
-  }
-  let stars = '';
-  for(let i=0;i<10;i++){
-    const [sx, sy] = pt(0.42, 0.42, i*36);
-    stars += '<text x="' + sx.toFixed(1) + '" y="' + sy.toFixed(1) + '" font-size="5.5" text-anchor="middle" dominant-baseline="middle" fill="' + k.rim + '" opacity="0.9">&#9733;</text>';
-  }
-  const fontSize = cimlet >= 1000 ? 15.5 : 19;
-
-  const face =
-    '<ellipse cx="' + cx + '" cy="' + topY + '" rx="' + RX + '" ry="' + RY + '" fill="url(#face-' + uid + ')"/>' +
-    notches +
-    '<ellipse cx="' + cx + '" cy="' + topY + '" rx="' + (RX*0.72) + '" ry="' + (RY*0.72) + '" fill="' + k.body + '"/>' +
-    '<ellipse cx="' + cx + '" cy="' + topY + '" rx="' + (RX*0.56) + '" ry="' + (RY*0.56) + '" fill="none" stroke="' + k.rim + '" stroke-width="2" stroke-dasharray="2.6 2.6"/>' +
-    stars +
-    '<ellipse cx="' + cx + '" cy="' + topY + '" rx="' + (RX*0.46) + '" ry="' + (RY*0.46) + '" fill="' + k.darker + '" stroke="' + k.rim + '" stroke-width="1.8"/>' +
-    '<text x="' + cx + '" y="' + (topY + 1) + '" font-size="' + fontSize + '" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="' + k.rim + '" stroke="rgba(0,0,0,0.5)" stroke-width="0.9" paint-order="stroke" font-family="Georgia, serif">' + k.label + '</text>';
-
-  return '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" role="img"><title>' + count + ' db ' + cimlet + ' Ft-os zseton</title>' +
-    '<defs>' +
-      '<linearGradient id="body-' + uid + '" x1="0" y1="0" x2="1" y2="0">' +
-        '<stop offset="0" stop-color="' + k.darker + '"/>' +
-        '<stop offset="0.5" stop-color="' + k.body + '"/>' +
-        '<stop offset="1" stop-color="' + k.darker + '"/>' +
-      '</linearGradient>' +
-      '<radialGradient id="face-' + uid + '" cx="0.4" cy="0.35" r="0.75">' +
-        '<stop offset="0" stop-color="' + k.light + '"/>' +
-        '<stop offset="1" stop-color="' + k.body + '"/>' +
-      '</radialGradient>' +
-      '<clipPath id="wallclip-' + uid + '"><path d="' + wallPathD + '"/></clipPath>' +
-    '</defs>' +
-    '<ellipse cx="' + cx + '" cy="' + groundY + '" rx="' + (RX*1.08) + '" ry="' + (RY*0.62) + '" fill="rgba(0,0,0,0.38)"/>' +
-    wall +
-    '<g clip-path="url(#wallclip-' + uid + ')">' + bands + stripes + seams + '</g>' +
-    face +
-    '</svg>';
-}
-
-// A near-frontal single coin (for loose piles of 1-4), showing the full round face with a thin edge.
-function coinSVG(cimlet){
-  const k = CIMLETEK[cimlet];
-  const uid = 'g' + (uidCounter++);
-  const R = 37, RYc = 33, THICK = 7, PAD2 = 5;
-  const cx = R + PAD2, cy = RYc + PAD2;
-  const W = R*2 + PAD2*2, H = RYc*2 + THICK + PAD2*2;
-
-  const edge = '<ellipse cx="' + cx + '" cy="' + (cy+THICK) + '" rx="' + R + '" ry="' + RYc + '" fill="' + k.darker + '"/>';
-
-  function pt(fracX, fracY, angleDeg){
-    const a = angleDeg * Math.PI/180;
-    return [cx + fracX*R*Math.sin(a), cy - fracY*RYc*Math.cos(a)];
-  }
-  let notches = '';
-  for(let i=0;i<8;i++){
-    const [nx, ny] = pt(0.86, 0.86, i*45);
-    notches += '<rect x="' + (nx-4) + '" y="' + (ny-3.2) + '" width="8" height="6.4" rx="2.4" fill="' + k.rim + '"/>';
-  }
-  let stars = '';
-  for(let i=0;i<10;i++){
-    const [sx, sy] = pt(0.44, 0.44, i*36);
-    stars += '<text x="' + sx.toFixed(1) + '" y="' + sy.toFixed(1) + '" font-size="4.8" text-anchor="middle" dominant-baseline="middle" fill="' + k.rim + '" opacity="0.9">&#9733;</text>';
-  }
-  const fontSize = cimlet >= 1000 ? 12.5 : 14.5;
-
-  const face =
-    '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + R + '" ry="' + RYc + '" fill="url(#coinface-' + uid + ')"/>' +
-    notches +
-    '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + (R*0.72) + '" ry="' + (RYc*0.72) + '" fill="' + k.body + '"/>' +
-    '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + (R*0.56) + '" ry="' + (RYc*0.56) + '" fill="none" stroke="' + k.rim + '" stroke-width="1.6" stroke-dasharray="2.2 2.2"/>' +
-    stars +
-    '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + (R*0.4) + '" ry="' + (RYc*0.4) + '" fill="' + k.darker + '" stroke="' + k.rim + '" stroke-width="1.4"/>' +
-    '<text x="' + cx + '" y="' + (cy+1) + '" font-size="' + fontSize + '" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="' + k.rim + '" stroke="rgba(0,0,0,0.5)" stroke-width="0.7" paint-order="stroke" font-family="Georgia, serif">' + k.label + '</text>';
-
-  return '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" role="img"><title>' + cimlet + ' Ft-os zseton</title>' +
-    '<defs><radialGradient id="coinface-' + uid + '" cx="0.4" cy="0.35" r="0.75">' +
-      '<stop offset="0" stop-color="' + k.light + '"/>' +
-      '<stop offset="1" stop-color="' + k.body + '"/>' +
-    '</radialGradient></defs>' +
-    edge + face + '</svg>';
-}
-
-function loosePileEl(cimlet, count){
-  const overlap = 38;
-  const wrap = document.createElement('div');
-  wrap.style.display = 'flex';
-  wrap.style.alignItems = 'flex-end';
-  for(let i=0;i<count;i++){
-    const s = document.createElement('div');
-    s.style.position = 'relative';
-    s.style.zIndex = i+1;
-    if(i > 0) s.style.marginLeft = '-' + overlap + 'px';
-    const rot = (Math.random()*8 - 4).toFixed(1);
-    s.style.transform = 'rotate(' + rot + 'deg)';
-    s.innerHTML = coinSVG(cimlet);
-    wrap.appendChild(s);
-  }
-  return wrap;
-}
-
-function stackEl(cimlet, count){
-  const pile = document.createElement('div');
-  pile.className = 'pile';
-  if(count < 5){
-    pile.appendChild(loosePileEl(cimlet, count));
-  } else {
-    pile.innerHTML = isoStackSVG(cimlet, count);
-  }
-  return pile;
-}
-
-function ujFeladat(){
-  const { maxDb, fajtak } = currentDifficulty;
-
-  // pick `fajtak` distinct denominations
-  const valasztott = [];
-  const pool = kulcsok.slice();
-  for(let i=0;i<fajtak;i++){
-    const idx = Math.floor(Math.random()*pool.length);
-    valasztott.push(pool.splice(idx,1)[0]);
-  }
-
-  jatek = 0;
-  const dbAdatok = valasztott.map(c => {
-    const db = ri(1, maxDb);
-    jatek += c * db;
-    return [c, db];
-  });
-
-  function pilesFor(db){
-    const arr = [];
-    let rem = db;
-    while(rem>0){ const h = Math.min(rem,5); arr.push(h); rem-=h; }
-    return arr;
-  }
-
-  const groups = dbAdatok.map(([c, db]) => [c, pilesFor(db)]);
-  for(let i=groups.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [groups[i], groups[j]] = [groups[j], groups[i]];
-  }
-
-  const table = document.getElementById('table');
-  table.innerHTML = '';
-  groups.forEach(([cimlet, heights]) => {
-    const groupEl = document.createElement('div');
-    groupEl.className = 'group';
-    heights.forEach(h => groupEl.appendChild(stackEl(cimlet, h)));
-    table.appendChild(groupEl);
-  });
-
-  const input = document.getElementById('valasz');
-  input.value = '';
-  input.focus();
-}
-
-function ellenoriz(){
-  const input = document.getElementById('valasz');
-  const v = parseInt(input.value, 10);
-  if(isNaN(v)) return;
-  total++;
-  const msg = document.getElementById('msg');
-  if(v === jatek){
-    score++; streak++;
-    msg.textContent = 'Ügyes vagy! Jön a következő asztal.';
-    msg.className = 'good';
-    if(streak > 0 && streak % 5 === 0){
-      showCombo(streak);
-    }
-    if(streak > bestStreak){
-      bestStreak = streak;
-      document.querySelector('#best .n').textContent = bestStreak;
-      saveBestStreak(bestStreak);
-    }
-  } else {
-    streak = 0;
-    msg.textContent = 'Nem jó — a helyes válasz: ' + jatek.toLocaleString('hu-HU') + ' Ft';
-    msg.className = 'bad';
-  }
-  document.querySelector('#total .n').textContent = total;
-  document.querySelector('#score .n').textContent = score;
-  document.querySelector('#streak .n').textContent = streak;
-  ujFeladat();
-}
-
-document.getElementById('check').addEventListener('click', ellenoriz);
-document.getElementById('valasz').addEventListener('keydown', e => { if(e.key === 'Enter') ellenoriz(); });
-document.querySelectorAll('.diff-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    currentDifficulty = DIFFICULTIES[btn.dataset.level];
-    document.getElementById('welcome').classList.add('hidden');
-    ujFeladat();
-  });
-});
-document.getElementById('menu-btn').addEventListener('click', () => {
-  document.getElementById('welcome').classList.remove('hidden');
-});
-</script>
 </body>
 </html>

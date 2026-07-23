@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Emlékezet & Elterelés">
+<meta name="theme-color" content="#0b3d2e">
+<title>Emlékezet & Elterelés</title>
+<style>
+  :root{
+    --felt-1:#0e5c44;
+    --felt-2:#08301f;
+    --gold:#d4af37;
+    --gold-dim:#a5842a;
+    --plaque:#123a2c;
+    --cream:#f3ead9;
+    --ink:#0a2118;
+    --good:#5fd38d;
+    --bad:#ff6b6b;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    background:
+      radial-gradient(circle at 50% 0%, var(--felt-1) 0%, var(--felt-2) 70%);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    color:var(--cream);
+    overscroll-behavior:none;
+  }
+  body{
+    display:flex; flex-direction:column; align-items:center;
+    min-height:100vh; padding:calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 24px);
+  }
+  h1{
+    font-family:Georgia,"Times New Roman",serif;
+    font-weight:700; letter-spacing:1px;
+    font-size:22px; color:var(--gold);
+    text-shadow:0 1px 0 rgba(0,0,0,0.4);
+    margin:0 0 4px;
+  }
+  .sub{ font-size:12px; color:rgba(243,234,217,0.55); margin-bottom:16px; letter-spacing:0.5px; text-align:center;}
+
+  .scoreboard{
+    display:flex; width:100%; max-width:420px;
+    background:var(--plaque);
+    border:1px solid rgba(212,175,55,0.35);
+    border-radius:14px;
+    margin-bottom:18px;
+  }
+  .stat{ flex:1; text-align:center; padding:10px 4px; border-radius:14px; }
+  .stat + .stat{ border-left:1px solid rgba(212,175,55,0.2); }
+  .stat .n{ font-family:Georgia,serif; font-size:24px; font-weight:700; }
+  .stat .l{ font-size:10px; text-transform:uppercase; letter-spacing:1px; color:rgba(243,234,217,0.55); margin-top:2px;}
+  #s-step .n{ color:var(--gold); }
+  #s-correct .n{ color:var(--good); }
+  #s-best .n{ color:#e0a03f; }
+
+  .table{
+    width:100%; max-width:420px;
+    background:
+      radial-gradient(ellipse at center, rgba(255,255,255,0.05), transparent 70%),
+      var(--felt-1);
+    border-radius:16px;
+    border:6px solid #6b3a20;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.45), 0 8px 20px rgba(0,0,0,0.4);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:16px;
+    min-height:220px;
+    padding:26px 16px;
+    margin-bottom:18px;
+    text-align:center;
+  }
+
+  .big-number{
+    font-family:Georgia,"Times New Roman",serif;
+    font-weight:700; font-size:56px; color:var(--gold);
+    letter-spacing:2px;
+    text-shadow:0 2px 0 rgba(0,0,0,0.4);
+  }
+  .hidden-number{
+    font-size:44px; color:rgba(243,234,217,0.25);
+  }
+
+  .timer-bar-wrap{
+    width:80%; max-width:260px; height:8px;
+    background:rgba(0,0,0,0.3);
+    border-radius:6px; overflow:hidden;
+    border:1px solid rgba(212,175,55,0.3);
+  }
+  .timer-bar{
+    height:100%; width:100%;
+    background:linear-gradient(90deg,var(--gold),var(--gold-dim));
+    transform-origin:left center;
+  }
+
+  .task-label{ font-size:13px; color:rgba(243,234,217,0.6); letter-spacing:0.5px; }
+  .task-expr{ font-family:Georgia,serif; font-size:32px; font-weight:700; color:var(--cream); }
+
+  .panel{ width:100%; max-width:420px; }
+  .row{ display:flex; gap:8px; }
+  input[type=number]{
+    flex:1; font-size:18px; padding:14px 14px;
+    border-radius:12px; border:1px solid rgba(212,175,55,0.4);
+    background:rgba(255,255,255,0.06); color:var(--cream);
+    outline:none;
+  }
+  input[type=number]::placeholder{ color:rgba(243,234,217,0.4); }
+  input[type=number]:focus{ border-color:var(--gold); box-shadow:0 0 0 3px rgba(212,175,55,0.2); }
+
+  button{
+    font-size:17px; font-weight:700; letter-spacing:0.3px;
+    padding:14px 20px; border-radius:12px; border:none;
+    background:linear-gradient(180deg,var(--gold),var(--gold-dim));
+    color:#2b2005;
+    box-shadow:0 3px 0 #7a5f18, 0 6px 10px rgba(0,0,0,0.35);
+  }
+  button:active{ transform:translateY(2px); box-shadow:0 1px 0 #7a5f18; }
+
+  #msg{ min-height:22px; font-size:14px; margin:12px 2px 0; text-align:center; }
+  .good{ color:var(--good); }
+  .bad{ color:var(--bad); }
+
+  .screen{
+    position:fixed; inset:0; z-index:10;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:
+      radial-gradient(circle at 50% 30%, var(--felt-1) 0%, var(--felt-2) 75%);
+    padding:24px; text-align:center;
+  }
+  .screen h2{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:28px; font-weight:700; color:var(--gold);
+    text-shadow:0 2px 0 rgba(0,0,0,0.4);
+    margin:0 0 10px;
+  }
+  .screen p{
+    font-size:15px; color:rgba(243,234,217,0.75);
+    max-width:320px; line-height:1.5; margin:0 0 20px;
+  }
+  .screen ul{
+    text-align:left; max-width:300px; margin:0 0 24px;
+    font-size:14px; color:rgba(243,234,217,0.8); line-height:1.6;
+  }
+  .screen button{ font-size:18px; padding:16px 32px; }
+  .screen.hidden{ display:none; }
+
+  .result-list{
+    width:100%; max-width:300px; margin-bottom:24px;
+  }
+  .result-row{
+    display:flex; justify-content:space-between;
+    padding:10px 14px; font-size:15px;
+    background:var(--plaque);
+    border:1px solid rgba(212,175,55,0.25);
+    border-radius:10px; margin-bottom:8px;
+  }
+  .result-row .v{ font-weight:700; }
+
+  .menu-btn{
+    align-self:flex-start;
+    font-size:13px; font-weight:600;
+    padding:8px 14px;
+    border-radius:10px;
+    border:1px solid rgba(212,175,55,0.4);
+    background:rgba(0,0,0,0.25);
+    color:var(--cream);
+    box-shadow:none;
+    margin-bottom:12px;
+  }
+  .menu-btn:active{ transform:translateY(1px); }
+
+  .btn-row{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+</style>
+</head>
+<body>
+
+  <div id="intro" class="screen">
+    <h2>♦ Emlékezet & Elterelés ♦</h2>
+    <p>Megjelenik egy szám 3 másodpercig — jegyezd meg! Utána 4 egyszerű
+    matekfeladatot kell megoldanod, ami elvonja a figyelmed. A végén
+    megkérdezzük: mi volt az eredeti szám?</p>
+    <button id="start-btn">Kezdés</button>
+  </div>
+
+  <div id="result" class="screen hidden">
+    <h2 id="result-title">Eredmény</h2>
+    <div class="result-list">
+      <div class="result-row"><span>Kitalált szám</span><span class="v" id="res-guess"></span></div>
+      <div class="result-row"><span>Eredeti szám</span><span class="v" id="res-target"></span></div>
+      <div class="result-row"><span>Matekfeladatok</span><span class="v" id="res-math"></span></div>
+      <div class="result-row"><span>Eltelt idő</span><span class="v" id="res-time"></span></div>
+    </div>
+    <div class="btn-row">
+      <button id="again-btn">Újra</button>
+      <button id="result-menu-btn">Főmenü</button>
+    </div>
+  </div>
+
+  <button id="menu-btn" class="menu-btn">← Főmenü</button>
+
+  <h1>♦ Emlékezet & Elterelés ♦</h1>
+  <p class="sub">Jegyezd meg a számot, oldd meg a feladatokat, mondd meg mi volt a szám</p>
+
+  <div class="scoreboard">
+    <div class="stat" id="s-step"><div class="n">–</div><div class="l">Fázis</div></div>
+    <div class="stat" id="s-correct"><div class="n">0/4</div><div class="l">Helyes</div></div>
+    <div class="stat" id="s-best"><div class="n">0</div><div class="l">Rekord sorozat</div></div>
+  </div>
+
+  <div class="table" id="table"></div>
+
+  <div class="panel">
+    <div class="row" id="answer-row" style="display:none;">
+      <input type="number" id="valasz" inputmode="numeric" placeholder="Válasz">
+      <button id="check">Kész</button>
+    </div>
+    <p id="msg"></p>
+  </div>
+
+<script>
+const MEMORIZE_MS = 3000;
+const MATH_TASK_COUNT = 4;
+const TARGET_MIN_STEPS = 5;   // 100 * 5 = 500
+const TARGET_MAX_STEPS = 30;  // 100 * 30 = 3000
+
+const ri = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+const round100 = n => Math.round(n / 100) * 100;
+
+let target = 0;
+let mathIndex = 0;
+let mathCorrect = 0;
+let bestStreak = 0;
+let currentTask = null;
+let startTime = 0;
+
+function loadBestStreak(){
+  try{
+    const v = localStorage.getItem('emlekezet-best-streak');
+    if(v){
+      bestStreak = parseInt(v, 10) || 0;
+      document.querySelector('#s-best .n').textContent = bestStreak;
+    }
+  }catch(e){
+    // localStorage unavailable (e.g. private browsing) — stay at 0
+  }
+}
+function saveBestStreak(v){
+  try{
+    localStorage.setItem('emlekezet-best-streak', String(v));
+  }catch(e){
+    // saving failed silently — not critical to gameplay
+  }
+}
+loadBestStreak();
+
+function setPhase(label){
+  document.querySelector('#s-step .n').textContent = label;
+}
+function setMsg(text, cls){
+  const msg = document.getElementById('msg');
+  msg.textContent = text || '';
+  msg.className = cls || '';
+}
+function updateCorrectStat(){
+  document.querySelector('#s-correct .n').textContent = mathCorrect + '/' + MATH_TASK_COUNT;
+}
+
+function genTarget(){
+  return ri(TARGET_MIN_STEPS, TARGET_MAX_STEPS) * 100;
+}
+
+function genMathTask(){
+  const op = Math.random() < 0.5 ? '+' : '×';
+  if(op === '+'){
+    const a = round100(ri(100, 10000));
+    const b = round100(ri(100, 10000));
+    return { a, b, op, answer: a + b };
+  } else {
+    const a = round100(ri(100, 10000));
+    const b = ri(2, 9);
+    return { a, b, op, answer: a * b };
+  }
+}
+
+function renderMemorize(){
+  setPhase('Megjegyzés');
+  document.getElementById('answer-row').style.display = 'none';
+  setMsg('');
+  const table = document.getElementById('table');
+  table.innerHTML =
+    '<div class="big-number">' + target.toLocaleString('hu-HU') + '</div>' +
+    '<div class="timer-bar-wrap"><div class="timer-bar" id="timer-bar"></div></div>';
+
+  const bar = document.getElementById('timer-bar');
+  requestAnimationFrame(() => {
+    bar.style.transition = 'transform ' + MEMORIZE_MS + 'ms linear';
+    bar.style.transform = 'scaleX(0)';
+  });
+
+  setTimeout(() => {
+    mathIndex = 0;
+    mathCorrect = 0;
+    updateCorrectStat();
+    renderMathTask();
+  }, MEMORIZE_MS);
+}
+
+function renderMathTask(){
+  if(mathIndex >= MATH_TASK_COUNT){
+    renderRecall();
+    return;
+  }
+  setPhase('Elterelés ' + (mathIndex+1) + '/' + MATH_TASK_COUNT);
+  currentTask = genMathTask();
+  const table = document.getElementById('table');
+  table.innerHTML =
+    '<div class="task-label">Feladat ' + (mathIndex+1) + ' / ' + MATH_TASK_COUNT + '</div>' +
+    '<div class="task-expr">' + currentTask.a.toLocaleString('hu-HU') + ' ' + currentTask.op + ' ' + currentTask.b.toLocaleString('hu-HU') + '</div>';
+
+  setMsg('');
+  const answerRow = document.getElementById('answer-row');
+  answerRow.style.display = 'flex';
+  const input = document.getElementById('valasz');
+  input.value = '';
+  input.placeholder = 'Eredmény';
+  input.focus();
+}
+
+function checkMathTask(){
+  const input = document.getElementById('valasz');
+  const v = parseInt(input.value, 10);
+  if(isNaN(v)) return;
+  if(v === currentTask.answer){
+    mathCorrect++;
+    setMsg('Helyes!', 'good');
+  } else {
+    setMsg('Nem jó — a helyes válasz: ' + currentTask.answer.toLocaleString('hu-HU'), 'bad');
+  }
+  updateCorrectStat();
+  mathIndex++;
+  setTimeout(renderMathTask, 700);
+}
+
+function renderRecall(){
+  setPhase('Visszakérdezés');
+  document.getElementById('answer-row').style.display = 'none';
+  setMsg('');
+  const table = document.getElementById('table');
+  table.innerHTML =
+    '<div class="task-label">Mi volt az eredeti szám?</div>' +
+    '<div class="hidden-number">?</div>';
+
+  const answerRow = document.getElementById('answer-row');
+  answerRow.style.display = 'flex';
+  const input = document.getElementById('valasz');
+  input.value = '';
+  input.placeholder = 'Eredeti szám';
+  input.focus();
+
+  document.getElementById('check').onclick = checkRecall;
+  input.onkeydown = e => { if(e.key === 'Enter') checkRecall(); };
+}
+
+function checkRecall(){
+  const input = document.getElementById('valasz');
+  const v = parseInt(input.value, 10);
+  if(isNaN(v)) return;
+  const elapsedMs = Date.now() - startTime;
+  const guessedRight = v === target;
+
+  if(guessedRight){
+    bestStreak++;
+  } else {
+    bestStreak = 0;
+  }
+  document.querySelector('#s-best .n').textContent = bestStreak;
+  saveBestStreak(bestStreak);
+
+  document.getElementById('res-guess').textContent = v.toLocaleString('hu-HU');
+  document.getElementById('res-guess').className = 'v ' + (guessedRight ? 'good' : 'bad');
+  document.getElementById('res-target').textContent = target.toLocaleString('hu-HU');
+  document.getElementById('res-math').textContent = mathCorrect + ' / ' + MATH_TASK_COUNT;
+  document.getElementById('res-time').textContent = (elapsedMs/1000).toFixed(1) + ' mp';
+  document.getElementById('result-title').textContent = guessedRight ? '✔ Eltaláltad!' : '✘ Nem talált';
+
+  document.getElementById('result').classList.remove('hidden');
+}
+
+function startGame(){
+  document.getElementById('intro').classList.add('hidden');
+  document.getElementById('result').classList.add('hidden');
+  target = genTarget();
+  startTime = Date.now();
+  setMsg('');
+  renderMemorize();
+
+  const check = document.getElementById('check');
+  check.onclick = checkMathTask;
+  const input = document.getElementById('valasz');
+  input.onkeydown = e => { if(e.key === 'Enter') checkMathTask(); };
+}
+
+document.getElementById('start-btn').addEventListener('click', startGame);
+document.getElementById('again-btn').addEventListener('click', startGame);
+document.getElementById('menu-btn').addEventListener('click', () => {
+  window.location.href = 'index.html';
+});
+document.getElementById('result-menu-btn').addEventListener('click', () => {
+  window.location.href = 'index.html';
+});
+</script>
+</body>
+</html>
