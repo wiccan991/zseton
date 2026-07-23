@@ -231,6 +231,7 @@ const round100 = n => Math.round(n / 100) * 100;
 let target = 0;
 let mathIndex = 0;
 let mathCorrect = 0;
+let currentStreak = 0;
 let bestStreak = 0;
 let currentTask = null;
 let startTime = 0;
@@ -278,8 +279,9 @@ function genMathTask(){
     const b = round100(ri(100, 10000));
     return { a, b, op, answer: a + b };
   } else {
-    const a = round100(ri(100, 10000));
-    const b = ri(2, 9);
+    const base = Math.random() < 0.5 ? 500 : 1000;
+    const a = Math.round(ri(1000, 10000) / base) * base;
+    const b = ri(2, 20);
     return { a, b, op, answer: a * b };
   }
 }
@@ -371,12 +373,15 @@ function checkRecall(){
   const guessedRight = v === target;
 
   if(guessedRight){
-    bestStreak++;
+    currentStreak++;
   } else {
-    bestStreak = 0;
+    currentStreak = 0;
   }
-  document.querySelector('#s-best .n').textContent = bestStreak;
-  saveBestStreak(bestStreak);
+  if(currentStreak > bestStreak){
+    bestStreak = currentStreak;
+    document.querySelector('#s-best .n').textContent = bestStreak;
+    saveBestStreak(bestStreak);
+  }
 
   document.getElementById('res-guess').textContent = v.toLocaleString('hu-HU');
   document.getElementById('res-guess').className = 'v ' + (guessedRight ? 'good' : 'bad');
