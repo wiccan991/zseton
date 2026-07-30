@@ -1,0 +1,30 @@
+{
+  "name": "zseton",
+  "version": "1.0.0",
+  "description": "Statikus, szerver nélküli böngészős játékgyűjtemény. Nincs build-lépés — minden fájl önmagában megnyitható.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sync": "cap sync android",
+    "open:android": "cap open android"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wiccan991/zseton.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/wiccan991/zseton/issues"
+  },
+  "homepage": "https://github.com/wiccan991/zseton#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.4.2",
+    "@capacitor/core": "^8.4.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.4.2"
+  }
+}

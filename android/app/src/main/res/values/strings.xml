@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">DEALER</string>
+    <string name="title_activity_main">DEALER</string>
+    <string name="package_name">com.zseton.jatekok</string>
+    <string name="custom_url_scheme">com.zseton.jatekok</string>
+</resources>
