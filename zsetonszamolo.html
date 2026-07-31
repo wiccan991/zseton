@@ -199,6 +199,11 @@
     <div class="topbar"><a class="back-link" href="index.html"><span class="chev">&#8249;</span> FŐMENÜ</a></div>
     <h1 class="page-title">Zsetonszámoló</h1>
     <p class="page-desc">Nézd meg jól a zsetontornyokat, és mondd meg, mennyi forintot érnek összesen!</p>
+    <div class="scoreboard">
+      <div class="stat"><div class="n" id="intro-games">0</div><div class="l">Játék</div></div>
+      <div class="stat"><div class="n" id="intro-accuracy">–</div><div class="l">Pontosság</div></div>
+      <div class="stat"><div class="n" id="intro-best">0</div><div class="l">Rekord</div></div>
+    </div>
     <div class="flex-spacer"></div>
     <div class="section-label">NEHÉZSÉG</div>
     <div class="difficulty-row" id="level-select">
@@ -270,6 +275,57 @@ function saveBestStreak(v){
   }
 }
 loadBestStreak();
+
+let stats = { games: 0, correct: 0 };
+function loadStats(){
+  try{
+    const v = localStorage.getItem('zseton-stats');
+    if(v) stats = JSON.parse(v);
+  }catch(e){
+    // localStorage unavailable — stay at defaults
+  }
+  updateStatsDisplay();
+}
+function saveStats(){
+  try{
+    localStorage.setItem('zseton-stats', JSON.stringify(stats));
+  }catch(e){
+    // saving failed silently — not critical to gameplay
+  }
+}
+function updateStatsDisplay(){
+  document.getElementById('intro-games').textContent = stats.games;
+  document.getElementById('intro-accuracy').textContent =
+    stats.games > 0 ? Math.round(stats.correct / stats.games * 100) + '%' : '–';
+  document.getElementById('intro-best').textContent = bestStreak;
+}
+loadStats();
+
+function playTone(freq, duration, type, gain){
+  try{
+    const ctx = playTone._ctx || (playTone._ctx = new (window.AudioContext || window.webkitAudioContext)());
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    g.gain.value = gain || 0.15;
+    osc.connect(g); g.connect(ctx.destination);
+    osc.start();
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.stop(ctx.currentTime + duration);
+  }catch(e){
+    // Web Audio unavailable — skip sound feedback
+  }
+}
+function feedbackCorrect(){
+  if(navigator.vibrate) navigator.vibrate(35);
+  playTone(880, 0.12);
+  setTimeout(() => playTone(1175, 0.14), 90);
+}
+function feedbackWrong(){
+  if(navigator.vibrate) navigator.vibrate([0, 50, 40, 50]);
+  playTone(180, 0.22, 'sawtooth', 0.12);
+}
 
 function showCombo(n){
   const badge = document.getElementById('combo-badge');
@@ -505,9 +561,12 @@ function ellenoriz(){
   const v = parseInt(input.value, 10);
   if(isNaN(v)) return;
   total++;
+  stats.games++;
   const msg = document.getElementById('msg');
   if(v === jatek){
     score++; streak++;
+    stats.correct++;
+    feedbackCorrect();
     msg.textContent = 'Ügyes vagy! Jön a következő asztal.';
     msg.className = 'good';
     if(streak > 0 && streak % 5 === 0){
@@ -520,9 +579,12 @@ function ellenoriz(){
     }
   } else {
     streak = 0;
+    feedbackWrong();
     msg.textContent = 'Nem jó — a helyes válasz: ' + jatek.toLocaleString('hu-HU') + ' Ft';
     msg.className = 'bad';
   }
+  saveStats();
+  updateStatsDisplay();
   document.querySelector('#total .n').textContent = total;
   document.querySelector('#score .n').textContent = score;
   document.querySelector('#streak .n').textContent = '×' + streak;
