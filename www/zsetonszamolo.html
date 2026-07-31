@@ -242,12 +242,11 @@
 
 <script>
 const CIMLETEK = {
-  100:   { label:'100',   body:'#3a8f4f', light:'#5fbf76', dark:'#2c6b3a', darker:'#215430', rim:'#eef7ee' },
-  500:   { label:'500',   body:'#2f6fc4', light:'#5b95e0', dark:'#25579c', darker:'#1c4478', rim:'#eaf2fb' },
-  1000:  { label:'1000',  body:'#c97a1e', light:'#e8a03f', dark:'#a15e13', darker:'#7d4a0f', rim:'#fdf3e3' },
-  2500:  { label:'2500',  body:'#7c3aed', light:'#a78bfa', dark:'#5b21b6', darker:'#3f1690', rim:'#f3ecfd' },
-  5000:  { label:'5000',  body:'#c73c37', light:'#e0645f', dark:'#9c2b27', darker:'#78211e', rim:'#fdecec' },
-  25000: { label:'25000', body:'#1c1c1e', light:'#3a3a3d', dark:'#0d0d0e', darker:'#000000', rim:'#f3ead9' }
+  100:   { label:'100',   body:'#3d1220', light:'#5c1f30', dark:'#2a0c16', darker:'#1a0810', rim:'#f7f5f2' },
+  500:   { label:'500',   body:'#8859a8', light:'#a878c4', dark:'#6b4084', darker:'#4f2d63', rim:'#f7f5f2' },
+  1000:  { label:'1000',  body:'#e8c93a', light:'#f5dc6b', dark:'#c9a520', darker:'#a3860f', rim:'#f7f5f2' },
+  5000:  { label:'5000',  body:'#c62828', light:'#e05a5a', dark:'#9e1f1f', darker:'#7a1717', rim:'#f7f5f2' },
+  25000: { label:'25000', body:'#d63a9a', light:'#ec6ec0', dark:'#b02575', darker:'#87195a', rim:'#f7f5f2' }
 };
 const kulcsok = Object.keys(CIMLETEK).map(Number);
 let jatek = 0, score = 0, total = 0, streak = 0, bestStreak = 0;
@@ -485,10 +484,7 @@ function ujFeladat(){
   }
 
   const groups = dbAdatok.map(([c, db]) => [c, pilesFor(db)]);
-  for(let i=groups.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [groups[i], groups[j]] = [groups[j], groups[i]];
-  }
+  groups.sort((a, b) => b[0] - a[0]);
 
   const table = document.getElementById('table');
   table.innerHTML = '';

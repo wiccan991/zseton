@@ -265,7 +265,6 @@ const TARGET_MAX_STEPS = 30;  // 100 * 30 = 3000
 
 const ri = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const round100 = n => Math.round(n / 100) * 100;
-const round25 = n => Math.round(n / 25) * 25;
 
 const LEVELS = {
   alap: {
@@ -276,17 +275,19 @@ const LEVELS = {
       lastTarget = n;
       return n;
     },
-    mathRound: round100
+    mathRound: round100,
+    mulMax: 20
   },
   nehez: {
     label: 'Nehéz',
     genTarget: () => {
       let n;
-      do{ n = round25(ri(1000, 100000)); } while(n === lastTarget);
+      do{ n = round100(ri(1000, 100000)); } while(n === lastTarget);
       lastTarget = n;
       return n;
     },
-    mathRound: round25
+    mathRound: round100,
+    mulMax: 50
   }
 };
 let currentLevelKey = 'alap';
@@ -347,7 +348,7 @@ function genMathTask(){
   } else {
     const base = Math.random() < 0.5 ? 500 : 1000;
     const a = Math.round(ri(1000, 10000) / base) * base;
-    const b = ri(2, 20);
+    const b = ri(2, currentLevel.mulMax);
     return { a, b, op, answer: a * b };
   }
 }
